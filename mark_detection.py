@@ -15,10 +15,12 @@ class MarkDetector:
         Args:
             model_file (str): ONNX model path.
         """
-        assert os.path.exists(model_file), f"File not found: {model_file}"
+        module_dir = os.path.dirname(__file__)  # Get directory of this module
+        file_path = os.path.join(module_dir, model_file)
+        assert os.path.exists(file_path), f"File not found: {file_path}"
         self._input_size = 128
         self.model = ort.InferenceSession(
-            model_file, providers=["CUDAExecutionProvider", "CPUExecutionProvider"])
+            file_path, providers=["CUDAExecutionProvider", "CPUExecutionProvider"])
 
     def _preprocess(self, bgrs):
         """Preprocess the inputs to meet the model's needs.
