@@ -100,13 +100,16 @@ def run():
             pose_estimator.visualize(frame, pose, color=(0, 255, 0))
 
             # Do you want to see the axes?
-            # pose_estimator.draw_axes(frame, pose)
+            pose_estimator.draw_axes(frame, pose)
 
             # Do you want to see the marks?
             # mark_detector.visualize(frame, marks, color=(0, 255, 0))
 
             # Do you want to see the face bounding boxes?
             # face_detector.visualize(frame, faces)
+
+            # print the euler angles
+            roll, pitch, yaw = pose_estimator.convert_pose(pose=pose)
 
         # Draw the FPS on screen.
         cv2.rectangle(frame, (0, 0), (90, 30), (0, 0, 0), cv2.FILLED)
