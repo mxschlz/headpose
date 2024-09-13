@@ -1,6 +1,7 @@
 """Estimate head pose according to the facial landmarks"""
 import cv2
 import numpy as np
+import os
 
 
 class PoseEstimator:
@@ -32,10 +33,14 @@ class PoseEstimator:
         self.t_vec = np.array(
             [[-14.97821226], [-10.62040383], [-2053.03596872]])
 
-    def _get_full_model_points(self, filename='assets/model.txt'):
+    @staticmethod
+    def _get_full_model_points(filename='assets/model.txt'):
         """Get all 68 3D model points from file"""
         raw_value = []
-        with open(filename) as file:
+        module_dir = os.path.dirname(__file__)  # Get directory of this module
+        file_path = os.path.join(module_dir, filename)
+
+        with open(file_path) as file:
             for line in file:
                 raw_value.append(line)
         model_points = np.array(raw_value, dtype=np.float32)
@@ -70,7 +75,7 @@ class PoseEstimator:
             tvec=self.t_vec,
             useExtrinsicGuess=True)
 
-        return (rotation_vector, translation_vector)
+        return rotation_vector, translation_vector
 
     def visualize(self, image, pose, color=(255, 255, 255), line_width=2):
         """Draw a 3D box as annotation of pose"""
@@ -130,3 +135,13 @@ class PoseEstimator:
         pyplot.xlabel('x')
         pyplot.ylabel('y')
         pyplot.show()
+
+    @staticmethod
+    def convert_pose(pose):
+        rotation_mat, _ = cv2.Rodrigues(pose[0])
+        pose_mat = cv2.hconcat((rotation_mat, pose[1]))
+        _, _, _, _, _, _, angles = cv2.decomposeProjectionMatrix(pose_mat)
+        angles[0, 0] = angles[0, 0]
+        print(f"\rAzimuth: {round(angles[1, 0], 2)} "
+              f"Elevation: {round(angles[0, 0], 2)} ")
+        return angles[1, 0], angles[0, 0], angles[2, 0]  # azimuth, elevation, tilt
